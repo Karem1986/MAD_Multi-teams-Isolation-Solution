@@ -41,7 +41,7 @@ A databricks notebook with pyspark small jobs to: read data from the source, del
 
 ## Additional Notes
 
-AI was utilized as an engineering co-pilot to assist with generating base Terraform boilerplate syntax, PySpark unit testing patterns, and structuring Markdown documentation. 
+AI was utilized as an engineering co-pilot to assist with generating base Terraform boilerplate syntax, PySpark unit testing patterns, and structuring Markdown documentation.
 All architecture choices, security boundaries, and code implementations were reviewed and tailored to meet Ahold Delhaize MAD standards.
 
 ## Future Steps - What I would do with more time
