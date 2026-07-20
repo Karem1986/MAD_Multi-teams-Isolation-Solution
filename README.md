@@ -2,9 +2,9 @@
 
 ![MAD_Terri_Architecture_Layers_Design](diagrams/MAD_Terri_Architecture_Layers_Design.png)
 
-## Storage and Insfrascture level
+## Storage and Insfrastructure level
 
-Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: team -analytics-data, team- ingest-data.
+Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: team-analytics-data, team-ingest-data.
 
 ## Databricks Workspace level - Connecting to Azure
 
@@ -31,5 +31,19 @@ Unity Catalog explicit GRANT statements enforce data boundaries:
 
 Thus, Members of grp-mad-ingest have zero permissions on analytics_catalog.
 
-## Terraform: How easy it would be to add a third team later by reusing the same module -  IaC made Scalable
+## Reusable Terraform Module: How easy it would be to add a third team later by reusing the same module
 
+The goal is to build a reusable Terraform Module locally executable (terraform plan ready).
+
+## Databricks Production-grade Pyspark Job
+
+A databricks notebook with pyspark small jobs to: read data from the source, delete duplicates/check for nulls and save the cleaned data to a delta lake table.
+
+## Additional Notes
+
+AI was utilized as an engineering co-pilot to assist with generating base Terraform boilerplate syntax, PySpark unit testing patterns, and structuring Markdown documentation. 
+All architecture choices, security boundaries, and code implementations were reviewed and tailored to meet Ahold Delhaize MAD standards.
+
+## Future Steps - What I would do with more time
+
+I would build CI/CD automations with GitHub Actions pipelines for automated terraform plan/apply and PyTest executions on Pull Requests.
