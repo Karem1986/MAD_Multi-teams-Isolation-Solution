@@ -4,7 +4,7 @@
 
 ## Storage and Insfrastructure level
 
-Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: team-analytics-data, team-ingest-data.
+Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: cnt-mad-analytics-dev and cnt-mad-ingest-dev.
 
 ## Databricks Workspace level - Connecting to Azure
 
@@ -63,7 +63,7 @@ The python workspace isolates business logic configurations from execution layer
 
 ## Configuration Externalization Blueprint (`src/config/`)
 
-All environment parameters, paths, and platform targets are externalized inside `pipeline_config.py`. It dynamically generates standard **ABFSS path strings** corresponding directly to the team namespace parameter passed at runtime.
+All environment parameters, paths, and platform targets are externalized inside `pipeline_config.json`. It dynamically generates standard **ABFSS path strings** corresponding directly to the team namespace parameter passed at runtime.
 
 ### Execution Notebook (`src/notebooks/`)
 
