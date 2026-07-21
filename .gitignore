@@ -1,0 +1,29 @@
+# --- Terraform Runtime Core ---
+# Prevents heavy cloud provider .exe binaries from being committed
+**/terraform/.terraform/
+**/.terraform/
+
+# --- Terraform State Storage ---
+# Protects sensitive configuration states and infrastructure locks
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+# --- Terraform Variables & Secrets ---
+# Crucial security barrier to prevent committing local passwords/tokens
+*.tfvars
+*.tfvars.json
+
+# --- Python & PySpark Runtimes ---
+# Prevents compilation cache and virtual environment bloat
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+env/
+venv/
+
+# --- OS System Artifacts ---
+.DS_Store
+Thumbs.db

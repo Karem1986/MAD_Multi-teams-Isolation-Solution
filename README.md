@@ -31,9 +31,26 @@ Unity Catalog explicit GRANT statements enforce data boundaries:
 
 Thus, Members of grp-mad-ingest have zero permissions on analytics_catalog.
 
-## Reusable Terraform Module: How easy it would be to add a third team later by reusing the same module
+## Reusable Terraform Child Module: How easy it would be to add a third team later by reusing the same module?
 
-The goal is to build a reusable Terraform Module locally executable (terraform plan ready).
+The goal is to build a reusable Terraform Module locally executable (terraform plan ready):
+
+reusable module name: 'modules/team_slice'
+
+Team Ingest gets a workspace named dbw-mad-ingest-dev and a private, isolated storage container named cnt-mad-ingest-dev.
+
+Team Analytics gets a workspace named dbw-mad-analytics-dev and a private, isolated storage container named cnt-mad-analytics-dev.
+
+Through the child module's design, each team's unique Azure Databricks Access Connector is granted access strictly to its respective container.
+
+The layout ensures they remain completely separate data boundaries inside the same storage account.
+
+*Multi-Team Extensibility Architecture:*
+Rather than duplicating brittle resource structures, the root core `main.tf` acts as a centralized automation engine.
+
+- It utilizes a declarative metadata loop (`for_each = local.onboarded_teams`) to dynamically provision isolated environments.
+
+- Adding a 3rd or 4th team in the future requires adding exactly one word to the string array (e.g., `"marketing"`). The child module instantly handles the provisioning of unique workspaces, system identity access connectors, and private containers.
 
 ## Databricks Production-grade Pyspark Job
 
