@@ -21,7 +21,7 @@ Two key enforcements:
 
 2. Unity Catalog Level: We assign data permissions explicitly to the groups. analytics_catalog grants access only to grp-mad-analytics, ensuring full data and code separation even though they share the underlying tenant and cloud subscription.
 
-## Data and Governance Level - Unity Catalog
+## Unity Catalog Governance Code Implementation
 
 A single, centralized Unity Catalog Metastore governs data assets. Each team owns a dedicated Catalog (analytics_catalog, ingest_catalog).
 
@@ -30,6 +30,11 @@ Unity Catalog explicit GRANT statements enforce data boundaries:
   'GRANT USE CATALOG, CREATE SCHEMA ON CATALOG analytics_catalog TO grp-mad-analytics'
 
 Thus, Members of grp-mad-ingest have zero permissions on analytics_catalog.
+
+To see how would this be handled in code, head to unity_catalog_governance.tf located at the root folder.
+
+*Explanation:*
+Since I am running an offline pseudo-terraform setup, I intentionally separated Cloud Infrastructure Provisioning from Data Governance Orchestration.The Terraform module we are looking at handles the Azure cloud control plane (building the workspace and storage). However, Unity Catalog resources—like Catalogs, Schemas, and SQL GRANT statements—cannot be built until the Databricks workspace is fully online and accessible.In a production-grade environment like MAD, we handle Unity Catalog in one of two ways: either via a Secondary Databricks Terraform Provider Pipeline targeted directly at the workspace URL, or natively via Databricks SQL / Notebook setup scripts once the workspace initializes.
 
 ## Reusable Terraform Child Module: How easy it would be to add a third team later by reusing the same module?
 
