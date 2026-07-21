@@ -24,7 +24,7 @@ resource "azurerm_storage_account" "mad_storage" {
 
 locals {
   # To satisfy the "add a 3rd/4th team later" requirement, engineers simply add 
-  # strings here. The root module handles everything else dynamically.
+  # the new team here. The root module handles everything else dynamically.
 
   onboarded_teams = toset([
     "analytics",
@@ -37,6 +37,9 @@ locals {
 
 module "team_slices" {
   source   = "./modules/team_slice"
+
+  # Declarative metadata loop to dynamically provision isolated environments.
+
   for_each = local.onboarded_teams
 
   team_name            = each.key # Dynamically evaluates to "analytics" then "ingest"
