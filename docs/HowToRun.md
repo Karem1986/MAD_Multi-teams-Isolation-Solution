@@ -20,6 +20,6 @@
 
 *Expected Output:* `Success! The configuration is valid.`
 
-![Terraform Validate Success](diagrams/Terraform_Validate_Success.png)
+![Terraform Validate Success](/diagrams/Terraform_Validate_Success.png)
 
 -Live `terraform plan` dry-runs are designed to target a running Azure Tenant control plane and are omitted locally to maintain offline code portability without hardcoding tenant tokens.
