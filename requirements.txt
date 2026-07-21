@@ -1,0 +1,12 @@
+# Base PySpark framework for local execution & ETL pipelines
+pyspark>=3.4.0, <4.0.0
+
+# Delta Lake integration for ACID transactions and Delta format support
+delta-spark>=3.0.0, <4.0.0
+
+# Testing framework for local PySpark unit tests
+pytest>=7.4.0
+
+# Code quality & linting (for clean code)
+flake8>=6.0.0
+black>=23.0.0

@@ -48,13 +48,42 @@ The layout ensures they remain completely separate data boundaries inside the sa
 *Multi-Team Extensibility Architecture:*
 Rather than duplicating brittle resource structures, the root core `main.tf` acts as a centralized automation engine.
 
-- It utilizes a declarative metadata loop (`for_each = local.onboarded_teams`) to dynamically provision isolated environments.
+- It utilizes a declarative metadata loop (`for_each = local.onboarded_teams`) to dynamically provision isolated environments, it is more production-grade and scalable pattern than duplicating module blocks manually.
 
 - Adding a 3rd or 4th team in the future requires adding exactly one word to the string array (e.g., `"marketing"`). The child module instantly handles the provisioning of unique workspaces, system identity access connectors, and private containers.
 
-## Databricks Production-grade Pyspark Job
+## Application Code & Databricks Spark Verification
 
-A databricks notebook with pyspark small jobs to: read data from the source, delete duplicates/check for nulls and save the cleaned data to a delta lake table.
+The python workspace isolates business logic configurations from execution layers, located entirely within the `src/` directory tree.
+
+## Configuration Externalization Blueprint (`src/config/`)
+
+All environment parameters, paths, and platform targets are externalized inside `pipeline_config.py`. It dynamically generates standard **ABFSS path strings** corresponding directly to the team namespace parameter passed at runtime.
+
+### Execution Notebook (`src/notebooks/`)
+
+The data pipeline script is written as a fully compatible **Databricks Notebook** (`data_pipeline.py`)
+
+- It utilizes Databricks Runtime Widgets to accept runtime inputs (`team_name`).
+- It reads data via the Spark engine, enforces strict data quality gates (drops duplicate business keys and removes records containing invalid null IDs), and writes to the destination using the performant **Delta Lake format**.
+
+### Local Verification Run & Testing Lifecycle (`src/tests/`)
+
+To validate data quality logic offline without active cloud workspace runtimes, a localized unit testing harness is provided via `pytest`.
+
+To execute the unit tests locally:
+
+```bash
+# 1. Establish your localized virtual test environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows PowerShell use: .\.venv\Scripts\Activate.ps1
+
+# 2. Install validation engine prerequisites
+pip install pytest pyspark
+
+# 3. Run the automated transformation test suite
+pytest src/tests/
+```
 
 ## Additional Notes
 

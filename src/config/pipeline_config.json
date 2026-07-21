@@ -1,0 +1,8 @@
+{
+  "dev": {
+    "storage_account": "stmadshareddev001",
+    "landing_container_prefix": "cnt-mad-",
+    "landing_zone": "landing/transactions",
+    "gold_zone": "gold/clean_transactions"
+  }
+}

@@ -1,5 +1,4 @@
-# --- Terraform Runtime Core ---
-# Prevents heavy cloud provider .exe binaries from being committed
+# PREVENT FROM COMMIT TO GIT
 **/terraform/.terraform/
 **/.terraform/
 
@@ -27,3 +26,9 @@ venv/
 # --- OS System Artifacts ---
 .DS_Store
 Thumbs.db
+
+# .venv
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
