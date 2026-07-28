@@ -3,6 +3,12 @@
 variable "environment" {
   type        = string
   description = "Target deployment environment (e.g., dev, tst, prod)."
+  default     = "dev"
+
+  validation {
+    condition     = contains(["dev", "tst", "stg", "prod"], var.environment)
+    error_message = "The environment variable must be one of: dev, tst, stg, prod."
+  }
 }
 
 variable "location" {
