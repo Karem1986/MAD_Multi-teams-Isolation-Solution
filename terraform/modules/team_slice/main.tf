@@ -1,11 +1,13 @@
 # REUSABLE MODULE: Azure Databricks Team Onboarding
 
 terraform {
-  required_version = ">= 1.3.0"
+  # Aligned with the root module baseline for version consistency
+  required_version = ">= 1.5.0" 
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.0.0"
+      version = "~> 4.0" # FIXED: Matches the root module v4.x major release constraint
     }
   }
 }
