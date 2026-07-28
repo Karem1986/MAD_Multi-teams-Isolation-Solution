@@ -1,4 +1,5 @@
 # REUSABLE MODULE: Azure Databricks Team Onboarding
+#SLIDE 5
 
 terraform {
   # Aligned with the root module baseline for version consistency
@@ -41,7 +42,7 @@ resource "azurerm_databricks_workspace" "team_ws" {
 resource "azurerm_storage_container" "team_container" {
   name                 = "cnt-${local.prefix}"
   storage_account_id = var.storage_account_id # To match with the variable and pass at runtime with terraform plan
-  container_access_type = "private"
+  container_access_type = "private" 
 }
 
 # 3. Access Connector for Unity Catalog (Managed Identity)

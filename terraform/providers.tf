@@ -28,4 +28,5 @@ provider "azurerm" {
 # via environment parameters or workspace connection configurations during live deployment.
 provider "databricks" {
   alias = "workspace"
+  #NO HOST YET
 }

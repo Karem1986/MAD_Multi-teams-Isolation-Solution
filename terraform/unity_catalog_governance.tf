@@ -4,8 +4,6 @@
 # data governance layer. It leverages the "databricks" provider to target the 
 # individual team workspaces provisioned by our primary infrastructure module.
 
-# DATABRICKS GOVERNANCE LAYER: Unity Catalog Access Control (Post-Provisioning)
-
 # Create the Dedicated Catalog for Team Analytics
 resource "databricks_catalog" "analytics_catalog" {
   provider     = databricks.workspace 

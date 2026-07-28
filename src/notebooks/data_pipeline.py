@@ -53,7 +53,7 @@ def transform_data(df):
 
 
 # 6. Pipeline Execution Block
-# Only attempts to load and save if running in an environment with access to the data lake
+# Only attempts to load and save if running in Databricks
 if "databricks" in sys.modules or os.getenv("MAD_EXECUTE_IO") == "true":
     print(f"[INFO] Executing live I/O operations against: {source_path}")
     df_raw = spark.read.format("json").load(source_path)
