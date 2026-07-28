@@ -2,7 +2,27 @@
 
 ![MAD_Terri_Architecture_Layers_Design](diagrams/MAD_Terri_Architecture_Layers_Design.png)
 
-## Storage and Insfrastructure level
+## Project Structure
+
+```
+├── terraform/
+│   ├── providers.tf                  # Provider versions and auth config
+│   ├── variables.tf                  # Root input variables
+│   ├── main.tf                       # Shared infrastructure + team onboarding loop
+│   ├── outputs.tf                    # Root outputs (workspace URLs, container names)
+│   ├── unity_catalog_governance.tf   # Post-provisioning governance layer (catalogs + grants)
+│   ├── terraform.tfvars.example      # Template — copy to terraform.tfvars before running
+│   └── modules/team_slice/           # Reusable per-team provisioning module
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+└── src/
+    ├── config/pipeline_config.json   # Externalized environment/path config
+    ├── notebooks/data_pipeline.py    # PySpark transformation pipeline (Databricks-compatible)
+    └── tests/test_pipeline.py        # Offline unit tests via pytest + PySpark local mode
+```
+
+## Storage and Infrastructure level
 
 Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: cnt-mad-analytics-dev and cnt-mad-ingest-dev.
 
@@ -28,7 +48,7 @@ While this architecture serves as a verified local pseudo-Terraform baseline, a 
 
 Each team has its own Azure Databricks Workspace.
 
-At the top level, there is a single Shared Microsoft Entra ID Tenant, which is standard enterprise practice for central identity management.However, to enforce strict team isolation, I created dedicated Entra ID Security Groups per team, one for Team Analytics and one for Team Ingest.
+At the top level, there is a single Shared Microsoft Entra ID Tenant, which is standard enterprise practice for central identity management. However, to enforce strict team isolation, I created dedicated Entra ID Security Groups per team, one for Team Analytics and one for Team Ingest.
 Microsoft Entra ID (Azure AD) Groups are created per team: grp-mad-analytics and grp-mad-ingest.
 
 Team members are assigned ONLY to their team’s workspace. Team Analytics members cannot log into the Ingest workspace, completely isolating notebooks, workflows, and job runs.
@@ -52,7 +72,7 @@ Thus, Members of grp-mad-ingest have zero permissions on analytics_catalog.
 To see how would this be handled in code, head to unity_catalog_governance.tf located at the root folder.
 
 *Explanation:*
-Since I am running an offline pseudo-terraform setup, I intentionally separated Cloud Infrastructure Provisioning from Data Governance Orchestration.The Terraform module we are looking at handles the Azure cloud control plane (building the workspace and storage). However, Unity Catalog resources—like Catalogs, Schemas, and SQL GRANT statements—cannot be built until the Databricks workspace is fully online and accessible.In a production-grade environment like MAD, we handle Unity Catalog in one of two ways: either via a Secondary Databricks Terraform Provider Pipeline targeted directly at the workspace URL, or natively via Databricks SQL / Notebook setup scripts once the workspace initializes.
+Since I am running an offline pseudo-terraform setup, I intentionally separated Cloud Infrastructure Provisioning from Data Governance Orchestration.The Terraform module we are looking at handles the Azure cloud control plane (building the workspace and storage). However, Unity Catalog resources like Catalogs, Schemas, and SQL GRANT statements cannot be built until the Databricks workspace is fully online and accessible (See HowToRunTerraform.md Notes). In a production-grade environment like MAD, we handle Unity Catalog in one of two ways: either via a Secondary Databricks Terraform Provider Pipeline targeted directly at the workspace URL, or natively via Databricks SQL / Notebook setup scripts once the workspace initializes.
 
 ## Reusable Terraform Child Module: How easy it would be to add a third team later by reusing the same module?
 
@@ -94,6 +114,28 @@ The data pipeline script is written as a fully compatible **Databricks Notebook*
 
 To validate data quality logic offline without active cloud workspace runtimes, a localized unit testing harness is provided via `pytest`.
 
+### Terraform Setup
+
+```bash
+# 1. Copy the variable template and populate with your target values
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars
+
+# 2. Initialize providers and modules
+cd terraform
+terraform init
+
+# 3. Validate configuration syntax
+terraform validate
+
+# 4. Plan infrastructure (Phase 1: Azure resources only)
+# The Unity Catalog governance layer in unity_catalog_governance.tf requires
+# running Databricks workspaces and is designed to run as a separate pipeline
+# once Phase 1 workspaces are online.
+terraform plan -target=module.team_slices -target=azurerm_resource_group.mad_rg -target=azurerm_storage_account.mad_storage
+```
+
+*Local Verification Run & Testing Lifecycle (`src/tests/`)
+
 To execute the unit tests locally:
 
 ```bash
@@ -102,7 +144,7 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows PowerShell use: .\.venv\Scripts\Activate.ps1
 
 # 2. Install validation engine prerequisites
-pip install pytest pyspark
+pip install -r requirements.txt
 
 # 3. Run the automated transformation test suite
 pytest src/tests/

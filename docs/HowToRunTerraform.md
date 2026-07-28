@@ -22,4 +22,12 @@
 
 ![Terraform Validate Success](/diagrams/Terraform_Validate_Success.png)
 
+*Important Notes*:
+
 -Live `terraform plan` dry-runs are designed to target a Live Azure Tenant control plane and are omitted locally to maintain offline code portability without hardcoding tenant tokens.
+
+- One alternative to run a 'terraform plan'successfully having only the provisioned infrastructure, would be to use the -target flag:
+
+```terraform plan -target=module.team_slices -target=azurerm_storage_account.mad_storage```
+
+- The databricks_* resources would fail the plan. The Databricks provider has no host configured. When terraform plan reaches databricks_catalog and databricks_grant, the provider tries to connect to a workspace endpoint and has nowhere to go. It would throw an error that can be solved one we get the databricks catalog and workspaces up and running.
