@@ -15,7 +15,6 @@ locals {
 
 # 1. Core Shared Base Platform Infrastructure
 
-
 # Shared Central Resource Group
 resource "azurerm_resource_group" "mad_rg" {
   name     = "rg-${local.prefix}"
@@ -33,7 +32,7 @@ resource "azurerm_storage_account" "mad_storage" {
   is_hns_enabled           = true # This activates Hierarchical Namespace (ADLS Gen2), it changes the storage account from a flat object store to a true directory file system. This is a strict pre-requisite for high-performance Delta Lake operations and Unity Catalog integrations in Databricks.
 }
 
-# 2. Automation Control Panel: Onboarded Teams Array
+# 2. Adding more teams dinamically with the reusable child module
 
 locals {
   # To satisfy the "add a 3rd/4th team later" requirement, engineers simply add 

@@ -12,7 +12,7 @@ variable "location" {
 
 variable "workload_name" {
   type        = string
-  description = "The overarching platform or application name baseline."
+  description = "application name baseline."
   default     = "mad"
 }
 
