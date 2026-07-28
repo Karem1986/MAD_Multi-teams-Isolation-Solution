@@ -22,6 +22,11 @@ variable "environment" {
   }
 }
 
+variable "storage_account_id" {
+  type        = string
+  description = "The resource ID of the shared ADLS Gen2 Storage Account."
+}
+
 variable "location" {
   type        = string
   description = "The target Azure Region where regional resources will be provisioned."

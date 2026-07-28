@@ -8,6 +8,7 @@
 
 # Create the Dedicated Catalog for Team Analytics
 resource "databricks_catalog" "analytics_catalog" {
+  provider     = databricks.workspace 
   metastore_id = var.central_metastore_id
   name         = "catalog_${var.workload_name}_analytics_${var.environment}"
   comment      = "Isolated data catalog dedicated entirely to Team Analytics workspace tasks."
@@ -16,6 +17,7 @@ resource "databricks_catalog" "analytics_catalog" {
 
 # Enforce Strict RBAC Permissions for Team Analytics
 resource "databricks_grant" "analytics_permissions" {
+  provider     = databricks.workspace 
   catalog    = databricks_catalog.analytics_catalog.name
   principal  = "grp-mad-analytics"
   privileges = ["USE_CATALOG", "CREATE_SCHEMA", "SELECT"]
@@ -34,6 +36,7 @@ resource "databricks_catalog" "ingest_catalog" {
 
 # Enforce Strict RBAC Permissions for Team Ingest
 resource "databricks_grant" "ingest_permissions" {
+  provider     = databricks.workspace
   catalog    = databricks_catalog.ingest_catalog.name
   principal  = "grp-mad-ingest"
   privileges = ["USE_CATALOG", "CREATE_SCHEMA", "MODIFY", "SELECT"]

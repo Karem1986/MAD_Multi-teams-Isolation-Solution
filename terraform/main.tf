@@ -57,5 +57,5 @@ module "team_slices" {
   environment          = var.environment
   location             = azurerm_resource_group.mad_rg.location
   resource_group_name  = azurerm_resource_group.mad_rg.name
-  storage_account_name = azurerm_storage_account.mad_storage.name
+  storage_account_id = azurerm_storage_account.mad_storage.id
 }

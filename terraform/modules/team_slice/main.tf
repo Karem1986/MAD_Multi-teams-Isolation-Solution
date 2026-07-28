@@ -40,7 +40,7 @@ resource "azurerm_databricks_workspace" "team_ws" {
 
 resource "azurerm_storage_container" "team_container" {
   name                 = "cnt-${local.prefix}"
-  storage_account_id   = "/subscriptions/.../resourceGroups/.../providers/Microsoft.Storage/storageAccounts/${var.storage_account_name}"
+  storage_account_id = var.storage_account_id # To match with the variable and pass at runtime with terraform plan
   container_access_type = "private"
 }
 
