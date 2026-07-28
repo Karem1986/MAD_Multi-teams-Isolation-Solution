@@ -9,3 +9,9 @@ variable "location" {
   type        = string
   description = "The target Azure Region where the central infrastructure will live."
 }
+
+variable "central_metastore_id" {
+  type        = string
+  description = "The global corporate Unity Catalog Metastore identifier required by governance assets."
+  default     = "metastore-0000-0000-0000" # Provided safe fallback default for offline blueprint compliance
+}

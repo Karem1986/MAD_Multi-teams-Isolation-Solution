@@ -29,7 +29,7 @@ resource "azurerm_databricks_workspace" "team_ws" {
   name                = "dbw-${local.prefix}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  sku                 = "premium" # Required for Unity Catalog governance & fine-grained RBAC
+  sku                 = "premium" # Required for Unity Catalog governance & fine-grained RBAC. Standard or basic workspaces lack the cloud-plane capabilities required to enable fine-grained access control, identity federation and Unity Catalog integrations.
 
   tags = local.common_tags
 }

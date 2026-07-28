@@ -36,7 +36,7 @@ locals {
 # 3. Dynamic Team Slice Provisioning (Consuming Shared Resources)
 
 module "team_slices" {
-  source   = "./modules/team_slice"
+  source = "./modules/team_slice"
 
   # Declarative metadata loop to dynamically provision isolated environments.
 
