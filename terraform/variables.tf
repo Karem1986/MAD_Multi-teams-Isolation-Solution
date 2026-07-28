@@ -10,6 +10,12 @@ variable "location" {
   description = "The target Azure Region where the central infrastructure will live."
 }
 
+variable "workload_name" {
+  type        = string
+  description = "The overarching platform or application name baseline."
+  default     = "mad"
+}
+
 variable "central_metastore_id" {
   type        = string
   description = "The global corporate Unity Catalog Metastore identifier required by governance assets."

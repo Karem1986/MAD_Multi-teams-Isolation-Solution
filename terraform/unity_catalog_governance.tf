@@ -4,21 +4,17 @@
 # data governance layer. It leverages the "databricks" provider to target the 
 # individual team workspaces provisioned by our primary infrastructure module.
 
-
-# ------------------------------------------------------------------------------
-# 1. TEAM ANALYTICS DATA GOVERNANCE BOUNDARY
-# ------------------------------------------------------------------------------
+# DATABRICKS GOVERNANCE LAYER: Unity Catalog Access Control (Post-Provisioning)
 
 # Create the Dedicated Catalog for Team Analytics
 resource "databricks_catalog" "analytics_catalog" {
   metastore_id = var.central_metastore_id
-  name         = "analytics_catalog"
+  name         = "catalog_${var.workload_name}_analytics_${var.environment}"
   comment      = "Isolated data catalog dedicated entirely to Team Analytics workspace tasks."
-  storage_root = "abfss://cnt-mad-analytics-dev@stmadshareddev001.dfs.core.windows.net/"
+  storage_root = "abfss://${module.team_slices["analytics"].storage_container_name}@${azurerm_storage_account.mad_storage.name}.dfs.core.windows.net/"
 }
 
-# Enforce RBAC Permissions for Team Analytics
-
+# Enforce Strict RBAC Permissions for Team Analytics
 resource "databricks_grant" "analytics_permissions" {
   catalog    = databricks_catalog.analytics_catalog.name
   principal  = "grp-mad-analytics"
@@ -26,20 +22,16 @@ resource "databricks_grant" "analytics_permissions" {
 }
 
 # ------------------------------------------------------------------------------
-# 2. TEAM INGEST DATA GOVERNANCE BOUNDARY
-# ------------------------------------------------------------------------------
 
 # Create the Dedicated Catalog for Team Ingest
-
 resource "databricks_catalog" "ingest_catalog" {
   metastore_id = var.central_metastore_id
-  name         = "ingest_catalog"
+  name         = "catalog_${var.workload_name}_ingest_${var.environment}"
   comment      = "Isolated data catalog dedicated entirely to Team Ingest workflow pipelines."
-  storage_root = "abfss://cnt-mad-ingest-dev@stmadshareddev001.dfs.core.windows.net/"
+  storage_root = "abfss://${module.team_slices["ingest"].storage_container_name}@${azurerm_storage_account.mad_storage.name}.dfs.core.windows.net/"
 }
 
 # Enforce Strict RBAC Permissions for Team Ingest
-
 resource "databricks_grant" "ingest_permissions" {
   catalog    = databricks_catalog.ingest_catalog.name
   principal  = "grp-mad-ingest"

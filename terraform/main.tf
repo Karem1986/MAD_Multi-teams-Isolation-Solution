@@ -1,17 +1,30 @@
 # ROOT CONFIGURATION: MAD Core Shared Infrastructure & Dynamic Team Onboarding
 
+# Centralized naming convention configuration to address hardcoded structures
+locals {
+  # Standardize region shorts (e.g., westeurope -> weu) to prevent long resource strings
+  location_short = var.location == "westeurope" ? "weu" : "glob"
+  
+  # Standardize core platform identifier prefix
+  prefix         = "mad-shared-${var.environment}-${local.location_short}"
+
+  # Safe, sanitized naming convention for storage accounts (Strict max 24 character Azure limit)
+  # Uses 3 arguments for replace() to strip out hyphens and forces completely lowercase
+  storage_name   = substr(lower(replace("stmadshared${var.environment}${local.location_short}001", "-", "")), 0, 24)
+}
+
 # 1. Core Shared Base Platform Infrastructure
+
 
 # Shared Central Resource Group
 resource "azurerm_resource_group" "mad_rg" {
-  name     = "rg-mad-shared-${var.environment}"
+  name     = "rg-${local.prefix}"
   location = var.location
 }
 
 # Shared Central ADLS Gen2 Storage Account (Hierarchical Namespace Enabled)
-
 resource "azurerm_storage_account" "mad_storage" {
-  name                     = "stmadshared${var.environment}001"
+  name                     = local.storage_name
   resource_group_name      = azurerm_resource_group.mad_rg.name
   location                 = azurerm_resource_group.mad_rg.location
   account_tier             = "Standard"
@@ -29,7 +42,6 @@ locals {
   onboarded_teams = toset([
     "analytics",
     "ingest"
-
   ])
 }
 
