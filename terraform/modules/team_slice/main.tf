@@ -39,8 +39,8 @@ resource "azurerm_databricks_workspace" "team_ws" {
 # 2. Team Storage Container
 
 resource "azurerm_storage_container" "team_container" {
-  name                  = "cnt-${local.prefix}"
-  storage_account_name  = var.storage_account_name
+  name                 = "cnt-${local.prefix}"
+  storage_account_id   = "/subscriptions/.../resourceGroups/.../providers/Microsoft.Storage/storageAccounts/${var.storage_account_name}"
   container_access_type = "private"
 }
 

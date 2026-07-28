@@ -25,6 +25,7 @@ resource "databricks_grant" "analytics_permissions" {
 
 # Create the Dedicated Catalog for Team Ingest
 resource "databricks_catalog" "ingest_catalog" {
+  provider     = databricks.workspace # Matches with databricks alias in providers.tf
   metastore_id = var.central_metastore_id
   name         = "catalog_${var.workload_name}_ingest_${var.environment}"
   comment      = "Isolated data catalog dedicated entirely to Team Ingest workflow pipelines."
