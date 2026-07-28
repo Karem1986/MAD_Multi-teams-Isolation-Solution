@@ -37,8 +37,3 @@ variable "resource_group_name" {
   type        = string
   description = "The name of the pre-existing shared Resource Group."
 }
-
-variable "storage_account_name" {
-  type        = string
-  description = "The name of the pre-existing shared ADLS Gen2 Storage Account."
-}
