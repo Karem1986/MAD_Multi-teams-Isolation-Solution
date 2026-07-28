@@ -72,7 +72,7 @@ Thus, Members of grp-mad-ingest have zero permissions on analytics_catalog.
 To see how would this be handled in code, head to unity_catalog_governance.tf located at the root folder.
 
 *Explanation:*
-Since I am running an offline pseudo-terraform setup, I intentionally separated Cloud Infrastructure Provisioning from Data Governance Orchestration.The Terraform module we are looking at handles the Azure cloud control plane (building the workspace and storage). However, Unity Catalog resources like Catalogs, Schemas, and SQL GRANT statements cannot be built until the Databricks workspace is fully online and accessible (See HowToRunTerraform.md Notes). In a production-grade environment like MAD, we handle Unity Catalog in one of two ways: either via a Secondary Databricks Terraform Provider Pipeline targeted directly at the workspace URL, or natively via Databricks SQL / Notebook setup scripts once the workspace initializes.
+Since I am running an offline pseudo-terraform setup, I intentionally separated Cloud Infrastructure Provisioning from Data Governance Orchestration. The Terraform module we are looking at handles the Azure cloud control plane (building the workspace and storage). However, Unity Catalog resources like Catalogs, Schemas, and SQL GRANT statements cannot be built until the Databricks workspace is fully online and accessible (See HowToRunTerraform.md Notes). In a production-grade environment like MAD, we handle Unity Catalog in one of two ways: either via a Secondary Databricks Terraform Provider Pipeline targeted directly at the workspace URL, or natively via Databricks SQL / Notebook setup scripts once the workspace initializes.
 
 ## Reusable Terraform Child Module: How easy it would be to add a third team later by reusing the same module?
 
@@ -114,28 +114,6 @@ The data pipeline script is written as a fully compatible **Databricks Notebook*
 
 To validate data quality logic offline without active cloud workspace runtimes, a localized unit testing harness is provided via `pytest`.
 
-### Terraform Setup
-
-```bash
-# 1. Copy the variable template and populate with your target values
-cp terraform/terraform.tfvars.example terraform/terraform.tfvars
-
-# 2. Initialize providers and modules
-cd terraform
-terraform init
-
-# 3. Validate configuration syntax
-terraform validate
-
-# 4. Plan infrastructure (Phase 1: Azure resources only)
-# The Unity Catalog governance layer in unity_catalog_governance.tf requires
-# running Databricks workspaces and is designed to run as a separate pipeline
-# once Phase 1 workspaces are online.
-terraform plan -target=module.team_slices -target=azurerm_resource_group.mad_rg -target=azurerm_storage_account.mad_storage
-```
-
-*Local Verification Run & Testing Lifecycle (`src/tests/`)
-
 To execute the unit tests locally:
 
 ```bash
@@ -148,6 +126,30 @@ pip install -r requirements.txt
 
 # 3. Run the automated transformation test suite
 pytest src/tests/
+```
+
+## Terraform Setup
+
+See [docs/HowToRunTerraform.md](docs/HowToRunTerraform.md) for the full step-by-step guide including screenshots.
+
+Quick reference:
+
+```bash
+# 1. Copy the variable template and populate with your target values
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars
+
+# 2. Navigate to the terraform directory and initialize (offline, no Azure login required)
+cd terraform
+terraform init -backend=false
+
+# 3. Validate configuration syntax
+terraform validate
+
+# 4. Plan infrastructure (Phase 1: Azure resources only)
+# The Unity Catalog governance layer in unity_catalog_governance.tf requires
+# running Databricks workspaces and is designed to run as a separate pipeline
+# once Phase 1 workspaces are online.
+terraform plan -target=module.team_slices -target=azurerm_resource_group.mad_rg -target=azurerm_storage_account.mad_storage
 ```
 
 ## Additional Notes
