@@ -6,7 +6,25 @@
 
 Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: cnt-mad-analytics-dev and cnt-mad-ingest-dev.
 
-## Databricks Workspace level - Connecting to Azure
+## Enterprise Production & Operational Considerations
+
+While this architecture serves as a verified local pseudo-Terraform baseline, a live production deployment onto Ahold Delhaize's central MAD platform would incorporate the following enterprise-grade standards:
+
+### 1. VNets & Private Endpoints
+
+- Databricks workspaces would be deployed using secure Virtual Network (VNet) injection. This separates compute cluster resources into private subnets and public subnets managed via corporate Network Security Groups (NSGs).
+- Direct public internet routing to the ADLS Gen2 Storage Account is disabled. All control-plane and data-plane traffic is routed through private endpoints and private DNS zones over an Azure ExpressRoute backbone network.
+
+### 2. Operational Secret Governance (Azure Key Vault)
+
+- Critical credentials, system application paths, and database tokens are never stored in plain text or state files. They are stored inside Azure Key Vault (AKV).
+- Workspaces leverage AKV-backed secret scopes. This allows notebooks to reference keys using securely permissioned `dbutils.secrets.get()` tokens natively at runtime without exposure risk.
+
+### 3. Identity Governance Infrastructure
+
+- The `azurerm_databricks_access_connector` utilizes System-Assigned Managed Identities. This eliminates the operational overhead of rotatable service principal client secrets, satisfying corporate compliance audits.
+
+## Databricks Workspace level
 
 Each team has its own Azure Databricks Workspace.
 
