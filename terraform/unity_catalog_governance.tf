@@ -3,7 +3,7 @@
 # NOTE: This is a pseudo-Terraform architecture blueprint showcasing the separate 
 # data governance layer. It leverages the "databricks" provider to target the 
 # individual team workspaces provisioned by our primary infrastructure module.
-
+#SLIDE 7
 # Create the Dedicated Catalog for Team Analytics
 resource "databricks_catalog" "analytics_catalog" {
   provider     = databricks.workspace 
@@ -20,8 +20,6 @@ resource "databricks_grant" "analytics_permissions" {
   principal  = "grp-mad-analytics"
   privileges = ["USE_CATALOG", "CREATE_SCHEMA", "SELECT"]
 }
-
-# ------------------------------------------------------------------------------
 
 # Create the Dedicated Catalog for Team Ingest
 resource "databricks_catalog" "ingest_catalog" {

@@ -26,6 +26,7 @@ provider "azurerm" {
 
 # The Databricks provider configuration block will dynamically initialize 
 # via environment parameters or workspace connection configurations during live deployment.
+# SLIDE 6
 provider "databricks" {
   alias = "workspace"
   #NO HOST YET
