@@ -34,7 +34,6 @@ resource "azurerm_databricks_workspace" "team_ws" {
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "premium" # Required for Unity Catalog governance & fine-grained RBAC. 
-  # Standard or basic workspaces lacks the capabilities required to enable fine-grained access control and Unity Catalog integrations.
 
   tags = local.common_tags
 }
@@ -43,8 +42,8 @@ resource "azurerm_databricks_workspace" "team_ws" {
 
 resource "azurerm_storage_container" "team_container" {
   name                 = "cnt-${local.prefix}"
-  storage_account_id = var.storage_account_id # To match with the variable and pass at runtime with terraform plan
-  container_access_type = "private" 
+  storage_account_id = var.storage_account_id
+  container_access_type = "private" # Only entities with an explicit role assignment can access it.
 }
 
 # 3. Access Connector for Unity Catalog (Managed Identity) 
