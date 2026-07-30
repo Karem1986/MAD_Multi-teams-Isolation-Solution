@@ -2,15 +2,53 @@
 
 ![MAD_Terri_Architecture_Layers_Design](diagrams/MAD_Terri_Architecture_Layers_Design.png)
 
-## Storage and Insfrastructure level
+## Project Structure
 
-Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: team-analytics-data, team-ingest-data.
+```
+├── terraform/
+│   ├── providers.tf                  # Provider versions and auth config
+│   ├── variables.tf                  # Root input variables
+│   ├── main.tf                       # Shared infrastructure + team onboarding loop
+│   ├── outputs.tf                    # Root outputs (workspace URLs, container names)
+│   ├── unity_catalog_governance.tf   # Post-provisioning governance layer (catalogs + grants)
+│   ├── terraform.tfvars.example      # Template — copy to terraform.tfvars before running
+│   └── modules/team_slice/           # Reusable per-team provisioning module
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+└── src/
+    ├── config/pipeline_config.json   # Externalized environment/path config
+    ├── notebooks/data_pipeline.py    # PySpark transformation pipeline (Databricks-compatible)
+    └── tests/test_pipeline.py        # Offline unit tests via pytest + PySpark local mode
+```
 
-## Databricks Workspace level - Connecting to Azure
+## Storage and Infrastructure level
+
+Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 isolated containers per team: cnt-mad-analytics-dev and cnt-mad-ingest-dev.
+
+## Enterprise Production & Operational Considerations
+
+While this architecture serves as a verified local pseudo-Terraform baseline, a live production deployment onto Ahold Delhaize's central MAD platform would incorporate the following enterprise-grade standards:
+
+### 1. VNets & Private Endpoints
+
+- Databricks workspaces would be deployed using secure Virtual Network (VNet) injection. This separates compute cluster resources into private subnets and public subnets managed via corporate Network Security Groups (NSGs).
+- Direct public internet routing to the ADLS Gen2 Storage Account is disabled. All control-plane and data-plane traffic is routed through private endpoints and private DNS zones over an Azure ExpressRoute backbone network.
+
+### 2. Operational Secret Governance (Azure Key Vault)
+
+- Critical credentials, system application paths, and database tokens are never stored in plain text or state files. They are stored inside Azure Key Vault (AKV).
+- Workspaces leverage AKV-backed secret scopes. This allows notebooks to reference keys using securely permissioned `dbutils.secrets.get()` tokens natively at runtime without exposure risk.
+
+### 3. Identity Governance Infrastructure
+
+- The `azurerm_databricks_access_connector` utilizes System-Assigned Managed Identities. This eliminates the operational overhead of rotatable service principal client secrets, satisfying corporate compliance audits.
+
+## Databricks Workspace level
 
 Each team has its own Azure Databricks Workspace.
 
-At the top level, there is a single Shared Microsoft Entra ID Tenant, which is standard enterprise practice for central identity management.However, to enforce strict team isolation, I created dedicated Entra ID Security Groups per team, one for Team Analytics and one for Team Ingest.
+At the top level, there is a single Shared Microsoft Entra ID Tenant, which is standard enterprise practice for central identity management. However, to enforce strict team isolation, I created dedicated Entra ID Security Groups per team, one for Team Analytics and one for Team Ingest.
 Microsoft Entra ID (Azure AD) Groups are created per team: grp-mad-analytics and grp-mad-ingest.
 
 Team members are assigned ONLY to their team’s workspace. Team Analytics members cannot log into the Ingest workspace, completely isolating notebooks, workflows, and job runs.
@@ -21,7 +59,7 @@ Two key enforcements:
 
 2. Unity Catalog Level: We assign data permissions explicitly to the groups. analytics_catalog grants access only to grp-mad-analytics, ensuring full data and code separation even though they share the underlying tenant and cloud subscription.
 
-## Data and Governance Level - Unity Catalog
+## Unity Catalog Governance Code Implementation
 
 A single, centralized Unity Catalog Metastore governs data assets. Each team owns a dedicated Catalog (analytics_catalog, ingest_catalog).
 
@@ -31,13 +69,88 @@ Unity Catalog explicit GRANT statements enforce data boundaries:
 
 Thus, Members of grp-mad-ingest have zero permissions on analytics_catalog.
 
-## Reusable Terraform Module: How easy it would be to add a third team later by reusing the same module
+To see how would this be handled in code, head to unity_catalog_governance.tf located at the root folder.
 
-The goal is to build a reusable Terraform Module locally executable (terraform plan ready).
+*Explanation:*
+Since I am running an offline pseudo-terraform setup, I intentionally separated Cloud Infrastructure Provisioning from Data Governance Orchestration. The Terraform module we are looking at handles the Azure cloud control plane (building the workspace and storage). However, Unity Catalog resources like Catalogs, Schemas, and SQL GRANT statements cannot be built until the Databricks workspace is fully online and accessible (See HowToRunTerraform.md Notes). In a production-grade environment like MAD, we handle Unity Catalog in one of two ways: either via a Secondary Databricks Terraform Provider Pipeline targeted directly at the workspace URL, or natively via Databricks SQL / Notebook setup scripts once the workspace initializes.
 
-## Databricks Production-grade Pyspark Job
+## Reusable Terraform Child Module: How easy it would be to add a third team later by reusing the same module?
 
-A databricks notebook with pyspark small jobs to: read data from the source, delete duplicates/check for nulls and save the cleaned data to a delta lake table.
+The goal is to build a reusable Terraform Module locally executable (terraform plan ready):
+
+reusable module name: 'modules/team_slice'
+
+Team Ingest gets a workspace named dbw-mad-ingest-dev and a private, isolated storage container named cnt-mad-ingest-dev.
+
+Team Analytics gets a workspace named dbw-mad-analytics-dev and a private, isolated storage container named cnt-mad-analytics-dev.
+
+Through the child module's design, each team's unique Azure Databricks Access Connector is granted access strictly to its respective container.
+
+The layout ensures they remain completely separate data boundaries inside the same storage account.
+
+*Multi-Team Extensibility Architecture:*
+Rather than duplicating brittle resource structures, the root core `main.tf` acts as a centralized automation engine.
+
+- It utilizes a declarative metadata loop (`for_each = local.onboarded_teams`) to dynamically provision isolated environments, it is more production-grade and scalable pattern than duplicating module blocks manually.
+
+- Adding a 3rd or 4th team in the future requires adding exactly one word to the string array (e.g., `"marketing"`). The child module instantly handles the provisioning of unique workspaces, system identity access connectors, and private containers.
+
+## Application Code & Databricks Spark Verification
+
+The python workspace isolates business logic configurations from execution layers, located entirely within the `src/` directory tree.
+
+## Configuration Externalization Blueprint (`src/config/`)
+
+All environment parameters, paths, and platform targets are externalized inside `pipeline_config.json`. It dynamically generates standard **ABFSS path strings** corresponding directly to the team namespace parameter passed at runtime.
+
+### Execution Notebook (`src/notebooks/`)
+
+The data pipeline script is written as a fully compatible **Databricks Notebook** (`data_pipeline.py`)
+
+- It utilizes Databricks Runtime Widgets to accept runtime inputs (`team_name`).
+- It reads data via the Spark engine, enforces strict data quality gates (drops duplicate business keys and removes records containing invalid null IDs), and writes to the destination using the performant **Delta Lake format**.
+
+### Local Verification Run & Testing Lifecycle (`src/tests/`)
+
+To validate data quality logic offline without active cloud workspace runtimes, a localized unit testing harness is provided via `pytest`.
+
+To execute the unit tests locally:
+
+```bash
+# 1. Establish your localized virtual test environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows PowerShell use: .\.venv\Scripts\Activate.ps1
+
+# 2. Install validation engine prerequisites
+pip install -r requirements.txt
+
+# 3. Run the automated transformation test suite
+pytest src/tests/
+```
+
+## Terraform Setup
+
+See [docs/HowToRunTerraform.md](docs/HowToRunTerraform.md) for the full step-by-step guide including screenshots.
+
+Quick reference:
+
+```bash
+# 1. Copy the variable template and populate with your target values
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars
+
+# 2. Navigate to the terraform directory and initialize (offline, no Azure login required)
+cd terraform
+terraform init -backend=false
+
+# 3. Validate configuration syntax
+terraform validate
+
+# 4. Plan infrastructure (Phase 1: Azure resources only)
+# The Unity Catalog governance layer in unity_catalog_governance.tf requires
+# running Databricks workspaces and is designed to run as a separate pipeline
+# once Phase 1 workspaces are online.
+terraform plan -target=module.team_slices -target=azurerm_resource_group.mad_rg -target=azurerm_storage_account.mad_storage
+```
 
 ## Additional Notes
 

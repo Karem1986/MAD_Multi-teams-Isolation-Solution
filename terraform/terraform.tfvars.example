@@ -1,0 +1,7 @@
+# Since tfvars files are never to be committed to git, I created this
+# TEMPLATE: Target Environment Parameter Configuration
+# Copy this file to 'terraform.tfvars' and populate with your specific values.
+# ==============================================================================
+
+environment = "dev"
+location    = "westeurope"
