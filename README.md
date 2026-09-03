@@ -4,7 +4,6 @@
 
 ## Project Structure
 
-```
 ├── terraform/
 │   ├── providers.tf                  # Provider versions and auth config
 │   ├── variables.tf                  # Root input variables
@@ -20,7 +19,6 @@
     ├── config/pipeline_config.json   # Externalized environment/path config
     ├── notebooks/data_pipeline.py    # PySpark transformation pipeline (Databricks-compatible)
     └── tests/test_pipeline.py        # Offline unit tests via pytest + PySpark local mode
-```
 
 ## Storage and Infrastructure level
 

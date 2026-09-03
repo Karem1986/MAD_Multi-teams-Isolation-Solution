@@ -20,7 +20,7 @@ resource "azurerm_resource_group" "mad_rg" {
   name     = "rg-${local.prefix}"
   location = var.location
 }
-
+#SLIDE 3
 # Shared Central ADLS Gen2 Storage Account (Hierarchical Namespace Enabled)
 resource "azurerm_storage_account" "mad_storage" {
   name                     = local.storage_name
