@@ -1,5 +1,5 @@
 # Validates pipeline data quality rules without requiring cloud connectivity.
-
+#SLIDE 9 quality gates
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
@@ -7,14 +7,12 @@ import sys
 import os
 
 # 1. Establish Absolute Runtime Path Resolution
-# This guarantees python can locate your notebook source code correctly
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else os.getcwd()
 NOTEBOOKS_DIR = os.path.normpath(os.path.join(CURRENT_DIR, "..", "notebooks"))
 
 if NOTEBOOKS_DIR not in sys.path:
     sys.path.append(NOTEBOOKS_DIR)
 
-# Import the transformation core logic directly from your script
 from data_pipeline import transform_data
 
 # 2. PyTest Fixtures
@@ -52,8 +50,8 @@ def test_transform_data_quality_gates(spark_session):
     mock_input_data = [
         ("TXN_100", "CUST_A", 150.50),  # Record 1: Valid record
         ("TXN_100", "CUST_A", 150.50),  # Record 2: Duplicate key (Should be dropped)
-        (None,      "CUST_B", 200.00),  # Record 3: Null Transaction ID (Should be dropped)
-        ("TXN_200", "CUST_C", None)     # Record 4: Null Amount Value (Should be dropped)
+        (None,      "CUST_B", 200.00),  # Record 3: Missing Transaction ID (Should be dropped)
+        ("TXN_200", "CUST_C", None)     # Record 4: Missing Amount Value (Should be dropped)
     ]
     
     # Instantiate the test DataFrame

@@ -4,7 +4,6 @@
 
 ## Project Structure
 
-```
 ├── terraform/
 │   ├── providers.tf                  # Provider versions and auth config
 │   ├── variables.tf                  # Root input variables
@@ -20,7 +19,6 @@
     ├── config/pipeline_config.json   # Externalized environment/path config
     ├── notebooks/data_pipeline.py    # PySpark transformation pipeline (Databricks-compatible)
     └── tests/test_pipeline.py        # Offline unit tests via pytest + PySpark local mode
-```
 
 ## Storage and Infrastructure level
 
@@ -28,7 +26,7 @@ Within Azure, there is a central Storage Account (ADLS Gen2) that contains 2 iso
 
 ## Enterprise Production & Operational Considerations
 
-While this architecture serves as a verified local pseudo-Terraform baseline, a live production deployment onto Ahold Delhaize's central MAD platform would incorporate the following enterprise-grade standards:
+While this architecture serves as a verified local pseudo-Terraform baseline and for demo purposes of my devops skills, a live production deployment at the client repository central MAD platform would incorporate the following enterprise-grade standards:
 
 ### 1. VNets & Private Endpoints
 
@@ -119,7 +117,9 @@ To execute the unit tests locally:
 ```bash
 # 1. Establish your localized virtual test environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows PowerShell use: .\.venv\Scripts\Activate.ps1
+source .venv/bin/activate  
+# On Windows PowerShell use:
+.\.venv\Scripts\Activate.ps1
 
 # 2. Install validation engine prerequisites
 pip install -r requirements.txt
@@ -155,7 +155,7 @@ terraform plan -target=module.team_slices -target=azurerm_resource_group.mad_rg 
 ## Additional Notes
 
 AI was utilized as an engineering co-pilot to assist with generating base Terraform boilerplate syntax, PySpark unit testing patterns, and structuring Markdown documentation.
-All architecture choices, security boundaries, and code implementations were reviewed and tailored to meet Ahold Delhaize MAD standards.
+All architecture choices, security boundaries, and code implementations were reviewed and tailored to meet the client standards.
 
 ## Future Steps - What I would do with more time
 
