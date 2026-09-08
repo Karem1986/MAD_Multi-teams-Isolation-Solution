@@ -2,23 +2,9 @@
 
 ![MAD_Terri_Architecture_Layers_Design](diagrams/MAD_Terri_Architecture_Layers_Design.png)
 
-## Project Structure
+## Goal
 
-├── terraform/
-│   ├── providers.tf                  # Provider versions and auth config
-│   ├── variables.tf                  # Root input variables
-│   ├── main.tf                       # Shared infrastructure + team onboarding loop
-│   ├── outputs.tf                    # Root outputs (workspace URLs, container names)
-│   ├── unity_catalog_governance.tf   # Post-provisioning governance layer (catalogs + grants)
-│   ├── terraform.tfvars.example      # Template — copy to terraform.tfvars before running
-│   └── modules/team_slice/           # Reusable per-team provisioning module
-│       ├── main.tf
-│       ├── variables.tf
-│       └── outputs.tf
-└── src/
-    ├── config/pipeline_config.json   # Externalized environment/path config
-    ├── notebooks/data_pipeline.py    # PySpark transformation pipeline (Databricks-compatible)
-    └── tests/test_pipeline.py        # Offline unit tests via pytest + PySpark local mode
+This project is based on a real devops task I was responsible for where I had to find a solution to add multiple teams and make sure each team had access only to their own data, permissions levels needed to be configured and the infrastructure for it to be built from scratch.
 
 ## Storage and Infrastructure level
 
